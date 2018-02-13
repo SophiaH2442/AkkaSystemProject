@@ -5,16 +5,6 @@ using Akka.Actor;
 
 namespace AkkaSystem
 {
-    public class WriteFile
-    {
-        public WriteFile(string evenFilePath)
-        {
-            EvenFilePath = evenFilePath;
-        }
-
-        public string EvenFilePath { get; set; }
-
-    }
     public class CsvWriterActor : ReceiveActor
     {
         public CsvWriterActor()
@@ -32,17 +22,31 @@ namespace AkkaSystem
             {
                 if (Int32.Parse(item) % 2 == 0)
                 {
-                    string[] array = new string[] { item.ToString() };
+                    string[] array = { item };
                     string separator = ",";
                     string joined = String.Join(separator, array);
                     Console.WriteLine(joined);
 
-                    //var evenfilePathAppConfig = ConfigurationManager.AppSettings["EvenFilePath"];
+                    var evenfilePathAppConfig = ConfigurationManager.AppSettings["EvenFilePath"];
 
-                    //using (StreamWriter writer = new StreamWriter(evenfilePathAppConfig))
-                    //{
+                    using (StreamWriter writer = new StreamWriter(evenfilePathAppConfig, append: true))
+                    {
+                        writer.WriteLine(joined);
+                    }
+                }
+                else
+                {
+                    string[] oddArray = { item };
+                    string oddSeparator = ",";
+                    string oddJoined = String.Join(oddSeparator, oddArray);
+                    Console.WriteLine(oddJoined);
 
-                    //}
+                    var oddfilePathAppConfig = ConfigurationManager.AppSettings["OddFilePath"];
+
+                    using (StreamWriter writer = new StreamWriter(oddfilePathAppConfig, append: true))
+                    {
+                        writer.WriteLine(oddJoined);
+                    }
                 }
             }
 

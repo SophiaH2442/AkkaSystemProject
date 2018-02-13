@@ -37,7 +37,6 @@ namespace AkkaSystem
             _csvWriterActor = csvWriterActor;
         }
 
-
         protected void ReadCsv(ReadFile message)
         {
             using (StreamReader reader = new StreamReader(message.FilePath))
