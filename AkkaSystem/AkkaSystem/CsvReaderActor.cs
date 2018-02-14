@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
 using Akka.Actor;
+using Akka.IO;
 
 namespace AkkaSystem
 {
@@ -48,11 +50,18 @@ namespace AkkaSystem
                     strline = reader.ReadLine();
                     values = strline.Split(',');
 
+                    var evenFilePathAppConfig = new EvenOpenFile(ConfigurationManager.AppSettings["EvenFilePath"]);
+                    _csvWriterActor.Tell(evenFilePathAppConfig);
+
+                    var oddFilePathAppConfig = new OddOpenFile(ConfigurationManager.AppSettings["OddFilePath"]);
+                    _csvWriterActor.Tell(oddFilePathAppConfig);
+
                     foreach (var item in values)
                     {
                         var writeNumberMessage = new WriteNumber(Int32.Parse(item));
                         _csvWriterActor.Tell(writeNumberMessage);
                     }
+                    
                 }
             }
         }
