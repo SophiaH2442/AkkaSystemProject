@@ -53,7 +53,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConsoleWriterActor.cs" />
     <Compile Include="CsvReaderActor.cs" />
     <Compile Include="CsvWriterActor.cs" />
     <Compile Include="Program.cs" />

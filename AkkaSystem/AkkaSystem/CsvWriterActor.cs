@@ -14,42 +14,30 @@ namespace AkkaSystem
 
         protected void WriteCsv(WriteNumber writeNumberMessage)
         {
-            string s = writeNumberMessage.ToString();
-            string[] t = null;
-            t = s.Split(' ');
-
-            foreach (var item in t)
+            if (writeNumberMessage.Number % 2 == 0)
             {
-                if (Int32.Parse(item) % 2 == 0)
+                Console.WriteLine(writeNumberMessage);
+
+                var evenfilePathAppConfig = ConfigurationManager.AppSettings["EvenFilePath"];
+
+                using (StreamWriter writer = new StreamWriter(evenfilePathAppConfig, append: true))
                 {
-                    string[] array = { item };
-                    string separator = ",";
-                    string joined = String.Join(separator, array);
-                    Console.WriteLine(joined);
-
-                    var evenfilePathAppConfig = ConfigurationManager.AppSettings["EvenFilePath"];
-
-                    using (StreamWriter writer = new StreamWriter(evenfilePathAppConfig, append: true))
-                    {
-                        writer.WriteLine(joined);
-                    }
-                }
-                else
-                {
-                    string[] oddArray = { item };
-                    string oddSeparator = ",";
-                    string oddJoined = String.Join(oddSeparator, oddArray);
-                    Console.WriteLine(oddJoined);
-
-                    var oddfilePathAppConfig = ConfigurationManager.AppSettings["OddFilePath"];
-
-                    using (StreamWriter writer = new StreamWriter(oddfilePathAppConfig, append: true))
-                    {
-                        writer.WriteLine(oddJoined);
-                    }
+                    writer.WriteLine(writeNumberMessage);
+                    writer.Close();
                 }
             }
+            else
+            {
+                Console.WriteLine(writeNumberMessage);
 
+                var oddfilePathAppConfig = ConfigurationManager.AppSettings["OddFilePath"];
+
+                using (StreamWriter writer = new StreamWriter(oddfilePathAppConfig, append: true))
+                {
+                    writer.WriteLine(writeNumberMessage);
+                    writer.Close();
+                }
+            }
         }
     }
 }
