@@ -2,7 +2,6 @@
 using System.Configuration;
 using System.IO;
 using Akka.Actor;
-using Akka.IO;
 
 namespace AkkaSystem
 {
@@ -61,7 +60,12 @@ namespace AkkaSystem
                         var writeNumberMessage = new WriteNumber(Int32.Parse(item));
                         _csvWriterActor.Tell(writeNumberMessage);
                     }
-                    
+
+                    var evenCloseFileMessage = new EvenCloseFile();
+                    _csvWriterActor.Tell(evenCloseFileMessage);
+
+                    var oddCloseFileMessage = new OddCloseFile();
+                    _csvWriterActor.Tell(oddCloseFileMessage);
                 }
             }
         }

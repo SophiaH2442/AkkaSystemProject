@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.IO;
 using Akka.Actor;
 
@@ -24,6 +23,13 @@ namespace AkkaSystem
         public string OddFilePath { get; set; }
     }
 
+    public class OddCloseFile
+    {
+    }
+
+    public class EvenCloseFile
+    {
+    }
 
     public class CsvWriterActor : ReceiveActor
     {
@@ -35,6 +41,8 @@ namespace AkkaSystem
             Receive<WriteNumber>(writeNumberMessage => WriteCsv(writeNumberMessage));
             Receive<EvenOpenFile>(message => StartWritingEven(message));
             Receive<OddOpenFile>(message => StartWritingOdd(message));
+            Receive<EvenCloseFile>(message => StopWritingEven(message));
+            Receive<OddCloseFile>(message => StopWritingOdd(message));
         }
 
         protected void StartWritingEven(EvenOpenFile message)
@@ -57,7 +65,7 @@ namespace AkkaSystem
                     return;
                 }
                 Console.WriteLine(writeNumberMessage);
-                _evenWriter.WriteLine(writeNumberMessage);
+                _evenWriter.Write(writeNumberMessage + ",");
                 _evenWriter.Flush();
             }
             else
@@ -68,9 +76,23 @@ namespace AkkaSystem
                     return;
                 }
                 Console.WriteLine(writeNumberMessage);
-                _oddWriter.WriteLine(writeNumberMessage);
+                _oddWriter.Write(writeNumberMessage + ",");
                 _oddWriter.Flush();
             }
+        }
+
+        protected void StopWritingEven(EvenCloseFile message)
+        {
+            _evenWriter.Close();
+            _evenWriter.Dispose();
+            _evenWriter = null;
+        }
+
+        protected void StopWritingOdd(OddCloseFile message)
+        {
+            _oddWriter.Close();
+            _oddWriter.Dispose();
+            _oddWriter = null;
         }
     }
 }
