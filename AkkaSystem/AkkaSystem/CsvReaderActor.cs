@@ -31,17 +31,20 @@ namespace AkkaSystem
     public class CsvReaderActor : ReceiveActor
     {
         private IActorRef _csvWriterActor;
+        private IStreamReaderFactory _streamReaderFactory;
 
-        public CsvReaderActor(IActorRef csvWriterActor)
+        public CsvReaderActor(IActorRef csvWriterActor, IStreamReaderFactory streamReaderFactory)
         {
             Receive<ReadFile>(message => ReadCsv(message));
             _csvWriterActor = csvWriterActor;
+            _streamReaderFactory = streamReaderFactory;
         }
 
         protected void ReadCsv(ReadFile message)
         {
-            using (StreamReader reader = new StreamReader(message.FilePath))
+            using (StreamReader reader = _streamReaderFactory.Create(message.FilePath))
             {
+
                 string strline = "";
                 string[] values = null;
                 while (!reader.EndOfStream)

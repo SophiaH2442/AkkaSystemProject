@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using System.IO;
 using Akka.Actor;
 
 namespace AkkaSystem
@@ -13,7 +14,8 @@ namespace AkkaSystem
             Props csvWriterProps = Props.Create<CsvWriterActor>();
             IActorRef csvWriterActor = MyActorSystem.ActorOf(csvWriterProps, "csvWriterActor");
 
-            Props csvReaderProps = Props.Create(() => new CsvReaderActor(csvWriterActor));
+            StreamReaderFactory readerFactory = new StreamReaderFactory();
+            Props csvReaderProps = Props.Create(() => new CsvReaderActor(csvWriterActor, readerFactory));
             IActorRef csvReaderActor = MyActorSystem.ActorOf(csvReaderProps, "csvReaderActor");
 
             var readFileMessage = new ReadFile(ConfigurationManager.AppSettings["FilePath"]);
