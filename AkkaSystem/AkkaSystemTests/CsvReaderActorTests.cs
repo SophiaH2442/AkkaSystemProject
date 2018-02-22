@@ -5,7 +5,7 @@ using Akka.TestKit;
 using Akka.TestKit.NUnit;
 using AkkaSystem;
 using Moq;
-using NUnit.Framework;
+using NUnit.Framework;  
 
 namespace AkkaSystemTests
 {
@@ -44,6 +44,38 @@ namespace AkkaSystemTests
             _streamReaderFactory.Setup(f => f.Create(filePath)).Returns(_streamReader);
             actorInTest.Tell(new ReadFile(filePath));
             AwaitAssert(() => _csvWriterActor.ExpectMsg<OddOpenFile>(), TimeSpan.FromSeconds(5));
+        }
+
+        [Test]
+        public void WhenReceivesReadFileMessage_TellsCsvWriterActorToWriteToEvenAndOddFile()
+        {
+            var actorInTest = CreateCsvReaderActor();
+            var filePath = "Dummy Path";
+            _streamReaderFactory.Setup(f => f.Create(filePath)).Returns(_streamReader);
+            actorInTest.Tell(new ReadFile(filePath));
+            AwaitAssert(() => _csvWriterActor.ExpectMsg<WriteNumber>(), TimeSpan.FromSeconds(5));
+        }
+
+        [Test]
+        public void WhenReceivesReadFileMessage_TellsCsvWriterActorToCloseEvenFile()
+        {
+            var actorInTest = CreateCsvReaderActor();
+            var filePath = "Dummy Path";
+            _streamReaderFactory.Setup(f => f.Create(filePath)).Returns(_streamReader);
+            actorInTest.Tell(new ReadFile(filePath));
+            AwaitAssert(() => _csvWriterActor.ExpectMsg<EvenCloseFile>(), TimeSpan.FromSeconds(5));
+        }
+
+        [Test]
+        public void WhenReceivesReadFileMessage_TellsCsvWriterActorToCloseOddFile()
+        {
+            var actorInTest = CreateCsvReaderActor();
+            var filePath = "Dummy Path Odd";
+            _streamReaderFactory.Setup(f => f.Create(filePath)).Returns(_streamReader);
+            actorInTest.Tell(new ReadFile(filePath));
+
+            _csvWriterActor.ReceiveN(4);
+            AwaitAssert(() => _csvWriterActor.ExpectMsg<OddCloseFile>(), TimeSpan.FromSeconds(6));
         }
 
         private IActorRef CreateCsvReaderActor()
