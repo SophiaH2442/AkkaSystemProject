@@ -1,8 +1,4 @@
-﻿using System.Configuration;
-using Akka.Actor;
-using Akka.TestKit.NUnit;
-using AkkaSystem;
-using Moq;
+﻿using Akka.TestKit.NUnit;
 using NUnit.Framework;
 
 namespace AkkaSystemTests
