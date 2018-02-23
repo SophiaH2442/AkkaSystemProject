@@ -6,6 +6,7 @@ using Akka.TestKit.NUnit;
 using AkkaSystem;
 using Moq;
 using NUnit.Framework;  
+// ReSharper disable ConvertToConstant.Local
 
 namespace AkkaSystemTests
 {
@@ -93,7 +94,7 @@ namespace AkkaSystemTests
             _streamReader = new StreamReader(_memoryStream);
         }
 
-        private string FakeFileContent()
+        private static string FakeFileContent()
         {
             return "1,2,3,4\n";
         }

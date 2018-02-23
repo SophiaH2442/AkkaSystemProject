@@ -1,28 +1,28 @@
-﻿using System.Configuration;
-using System.IO;
-using Akka.Actor;
+﻿using Akka.Actor;
+using System.Configuration;
 
 namespace AkkaSystem
 {
-    public class Program
+    public static class Program
     {
-        public static ActorSystem MyActorSystem;
-        static void Main(string[] args)
+        private static ActorSystem _myActorSystem;
+
+        private static void Main()
         {
-            MyActorSystem = ActorSystem.Create("MyActorSystem");
+            _myActorSystem = ActorSystem.Create("MyActorSystem");
 
-            StreamWriterFactory writerEvenFactory = new StreamWriterFactory();
-            Props csvWriterProps = Props.Create(() => new CsvWriterActor(writerEvenFactory));
-            IActorRef csvWriterActor = MyActorSystem.ActorOf(csvWriterProps, "csvWriterActor");
+            var writerEvenFactory = new StreamWriterFactory();
+            var csvWriterProps = Props.Create(() => new CsvWriterActor(writerEvenFactory));
+            var csvWriterActor = _myActorSystem.ActorOf(csvWriterProps, "csvWriterActor");
 
-            StreamReaderFactory readerFactory = new StreamReaderFactory();
-            Props csvReaderProps = Props.Create(() => new CsvReaderActor(csvWriterActor, readerFactory));
-            IActorRef csvReaderActor = MyActorSystem.ActorOf(csvReaderProps, "csvReaderActor");
+            var readerFactory = new StreamReaderFactory();
+            var csvReaderProps = Props.Create(() => new CsvReaderActor(csvWriterActor, readerFactory));
+            var csvReaderActor = _myActorSystem.ActorOf(csvReaderProps, "csvReaderActor");
 
             var readFileMessage = new ReadFile(ConfigurationManager.AppSettings["FilePath"]);
             csvReaderActor.Tell(readFileMessage);
 
-            MyActorSystem.WhenTerminated.Wait();
+            _myActorSystem.WhenTerminated.Wait();
         }
     }
 }

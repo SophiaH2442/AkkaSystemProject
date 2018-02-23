@@ -4,36 +4,9 @@ using Akka.Actor;
 
 namespace AkkaSystem
 {
-    public class EvenOpenFile
-    {
-        public EvenOpenFile(string evenFilePath)
-        {
-            EvenFilePath = evenFilePath;
-        }
-        public string EvenFilePath { get; private set; }
-    }
-
-    public class OddOpenFile
-    {
-        public OddOpenFile(string oddFilePath)
-        {
-            OddFilePath = oddFilePath;
-        }
-
-        public string OddFilePath { get; private set; }
-    }
-
-    public class OddCloseFile
-    {
-    }
-
-    public class EvenCloseFile
-    {
-    }
-
     public class CsvWriterActor : ReceiveActor
     {
-        private IStreamWriterFactory _streamWriterFactory;
+        private readonly IStreamWriterFactory _streamWriterFactory;
         private StreamWriter _oddWriter;
         private StreamWriter _evenWriter;
 
@@ -44,23 +17,21 @@ namespace AkkaSystem
             Receive<WriteNumber>(writeNumberMessage => WriteCsv(writeNumberMessage));
             Receive<EvenOpenFile>(message => StartWritingEven(message));
             Receive<OddOpenFile>(message => StartWritingOdd(message));
-            Receive<EvenCloseFile>(message => StopWritingEven(message));
-            Receive<OddCloseFile>(message => StopWritingOdd(message));
+            Receive<EvenCloseFile>(message => StopWritingEven());
+            Receive<OddCloseFile>(message => StopWritingOdd());
         }
 
-
-
-        protected void StartWritingEven(EvenOpenFile message)
+        private void StartWritingEven(EvenOpenFile message)
         {
             _evenWriter = _streamWriterFactory.Create(message.EvenFilePath);
         }
 
-        protected void StartWritingOdd(OddOpenFile message)
+        private void StartWritingOdd(OddOpenFile message)
         {
             _oddWriter = _streamWriterFactory.Create(message.OddFilePath);
         }
 
-        protected void WriteCsv(WriteNumber writeNumberMessage)
+        private void WriteCsv(WriteNumber writeNumberMessage)
         {
             if (writeNumberMessage.Number % 2 == 0)
             {
@@ -86,14 +57,14 @@ namespace AkkaSystem
             }
         }
 
-        protected void StopWritingEven(EvenCloseFile message)
+        private void StopWritingEven()
         {
             _evenWriter.Close();
             _evenWriter.Dispose();
             _evenWriter = null;
         }
 
-        protected void StopWritingOdd(OddCloseFile message)
+        private void StopWritingOdd()
         {
             _oddWriter.Close();
             _oddWriter.Dispose();
