@@ -10,7 +10,7 @@ namespace AkkaSystem
         {
             EvenFilePath = evenFilePath;
         }
-        public string EvenFilePath { get; set; }
+        public string EvenFilePath { get; private set; }
     }
 
     public class OddOpenFile
@@ -20,7 +20,7 @@ namespace AkkaSystem
             OddFilePath = oddFilePath;
         }
 
-        public string OddFilePath { get; set; }
+        public string OddFilePath { get; private set; }
     }
 
     public class OddCloseFile
@@ -33,11 +33,14 @@ namespace AkkaSystem
 
     public class CsvWriterActor : ReceiveActor
     {
-        private StreamWriter _evenWriter;
+        private IStreamWriterFactory _streamWriterFactory;
         private StreamWriter _oddWriter;
+        private StreamWriter _evenWriter;
 
-        public CsvWriterActor()
+        public CsvWriterActor(IStreamWriterFactory streamWriterFactory)
         {
+            _streamWriterFactory = streamWriterFactory;
+
             Receive<WriteNumber>(writeNumberMessage => WriteCsv(writeNumberMessage));
             Receive<EvenOpenFile>(message => StartWritingEven(message));
             Receive<OddOpenFile>(message => StartWritingOdd(message));
@@ -45,14 +48,16 @@ namespace AkkaSystem
             Receive<OddCloseFile>(message => StopWritingOdd(message));
         }
 
+
+
         protected void StartWritingEven(EvenOpenFile message)
         {
-            _evenWriter = new StreamWriter(message.EvenFilePath);
+            _evenWriter = _streamWriterFactory.Create(message.EvenFilePath);
         }
 
         protected void StartWritingOdd(OddOpenFile message)
         {
-            _oddWriter = new StreamWriter(message.OddFilePath);
+            _oddWriter = _streamWriterFactory.Create(message.OddFilePath);
         }
 
         protected void WriteCsv(WriteNumber writeNumberMessage)

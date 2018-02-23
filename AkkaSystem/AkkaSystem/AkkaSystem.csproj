@@ -55,9 +55,11 @@
   <ItemGroup>
     <Compile Include="CsvReaderActor.cs" />
     <Compile Include="CsvWriterActor.cs" />
+    <Compile Include="IStreamWriterFactory.cs" />
     <Compile Include="IStreamReaderFactory.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StreamWriterFactory.cs" />
     <Compile Include="StreamReaderFactory.cs" />
   </ItemGroup>
   <ItemGroup>

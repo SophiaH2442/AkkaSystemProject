@@ -11,7 +11,8 @@ namespace AkkaSystem
         {
             MyActorSystem = ActorSystem.Create("MyActorSystem");
 
-            Props csvWriterProps = Props.Create<CsvWriterActor>();
+            StreamWriterFactory writerEvenFactory = new StreamWriterFactory();
+            Props csvWriterProps = Props.Create(() => new CsvWriterActor(writerEvenFactory));
             IActorRef csvWriterActor = MyActorSystem.ActorOf(csvWriterProps, "csvWriterActor");
 
             StreamReaderFactory readerFactory = new StreamReaderFactory();

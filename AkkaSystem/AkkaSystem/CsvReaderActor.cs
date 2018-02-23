@@ -42,35 +42,35 @@ namespace AkkaSystem
 
         protected void ReadCsv(ReadFile message)
         {
+            // Open files
+            var evenFilePathAppConfig = new EvenOpenFile(ConfigurationManager.AppSettings["EvenFilePath"]);
+            _csvWriterActor.Tell(evenFilePathAppConfig);
+
+            var oddFilePathAppConfig = new OddOpenFile(ConfigurationManager.AppSettings["OddFilePath"]);
+            _csvWriterActor.Tell(oddFilePathAppConfig);
+            
+            // Write to them
             using (StreamReader reader = _streamReaderFactory.Create(message.FilePath))
             {
-
-                string strline = "";
-                string[] values = null;
                 while (!reader.EndOfStream)
                 {
-                    strline = reader.ReadLine();
-                    values = strline.Split(',');
-
-                    var evenFilePathAppConfig = new EvenOpenFile(ConfigurationManager.AppSettings["EvenFilePath"]);
-                    _csvWriterActor.Tell(evenFilePathAppConfig);
-
-                    var oddFilePathAppConfig = new OddOpenFile(ConfigurationManager.AppSettings["OddFilePath"]);
-                    _csvWriterActor.Tell(oddFilePathAppConfig);
+                    var strline = reader.ReadLine();
+                    var values = strline.Split(',');
 
                     foreach (var item in values)
                     {
                         var writeNumberMessage = new WriteNumber(Int32.Parse(item));
                         _csvWriterActor.Tell(writeNumberMessage);
                     }
-
-                    var evenCloseFileMessage = new EvenCloseFile();
-                    _csvWriterActor.Tell(evenCloseFileMessage);
-
-                    var oddCloseFileMessage = new OddCloseFile();
-                    _csvWriterActor.Tell(oddCloseFileMessage);
                 }
             }
+
+            // Close the files
+            var evenCloseFileMessage = new EvenCloseFile();
+            _csvWriterActor.Tell(evenCloseFileMessage);
+
+            var oddCloseFileMessage = new OddCloseFile();
+            _csvWriterActor.Tell(oddCloseFileMessage);
         }
     }
 }

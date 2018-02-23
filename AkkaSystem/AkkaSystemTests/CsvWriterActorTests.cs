@@ -1,72 +1,76 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Akka.Actor;
-using Akka.TestKit;
 using Akka.TestKit.NUnit;
 using AkkaSystem;
+using Moq;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 
 namespace AkkaSystemTests
 {
     [TestFixture]
     public class CsvWriterActorTests : TestKit
     {
-        //private MemoryStream _memoryStream;
-        //private StreamWriter _evenStreamWriter;
-        //private StreamWriter _oddStreamWriter;
+        private MemoryStream _memoryStream;
+        private StreamWriter _streamWriter;
+        private Mock<IStreamWriterFactory> _streamWriterFactory;
 
-        //[SetUp]
-        //public void Setup()
-        //{
-        //    CreateEvenStreamWriter();
-        //    CreateOddStreamWriter();
-        //}
+        [SetUp]
+        public void Setup()
+        {
+            CreateStreamWriter();
+            _streamWriterFactory = new Mock<IStreamWriterFactory>();
+        }
 
-        //[Test]
-        //public void WhenReceivesEvenOpenFileMessage_CreatesNewEvenStreamWriter()
-        //{
-        //    var actorInTest = CreateCsvWriterActor();
-        //    var evenFilePath = "Dummy Path";
-        //    actorInTest.Tell(new EvenOpenFile(evenFilePath));
-            
-        //}
+        [Test]
+        public void WhenReceivesEvenOpenFileMessage_CreatesNewStreamWriter()
+        {
+            // Arrange
+            //passed into Actor via EvenOpenFile and Actor should pass to the Streamwriter when calling Create()
+            var evenFilePath = "Pickles and jams.txt"; 
+
+            // If writerFactory.Create() is called with this exact string THEN return writer
+            _streamWriterFactory.Setup(f => f.Create(evenFilePath)).Returns(_streamWriter);
+            var actorInTest = CreateCsvWriterActor();
+            // Act
+            actorInTest.Tell(new EvenOpenFile(evenFilePath));
+
+            // Assert
+            AwaitAssert(() => 
+                    _streamWriterFactory.VerifyAll() // Proves actor calls streamWriterFactory with correct filename
+            , TimeSpan.FromSeconds(50)); // Actor is async, so if pause is not here, method may not have run yet
+        }
+
+        [Test]
+        public void WhenReceivesOddOpenFileMessage_CreatesNewStreamWriter()
+        {
+            var oddFilePath = "Sam Vimes";
+            _streamWriterFactory.Setup(f => f.Create(oddFilePath)).Returns(_streamWriter);
+            var actorInTest = CreateCsvWriterActor();
+
+            actorInTest.Tell(new OddOpenFile(oddFilePath));
+
+            AwaitAssert(() => _streamWriterFactory.VerifyAll(), TimeSpan.FromSeconds(5));
+            AwaitAssert(() => _streamWriterFactory.Verify(f => f.Create("Sam Vimes")), TimeSpan.FromSeconds(5));
+        }
 
 
+        private IActorRef CreateCsvWriterActor()
+        {
+            return Sys.ActorOf(Props.Create(() => new CsvWriterActor(_streamWriterFactory.Object)));
+        }
 
-        //private IActorRef CreateCsvWriterActor()
-        //{
-        //    return Sys.ActorOf(Props.Create(() => new CsvWriterActor()));
-        //}
+        private void CreateStreamWriter()
+        {
+            _memoryStream = new MemoryStream();
+            _streamWriter = new StreamWriter(_memoryStream);
+            _streamWriter.Write(FakeFileContent());
+            _streamWriter.Flush();
+        }
 
-        //private void CreateEvenStreamWriter()
-        //{
-        //    _memoryStream = new MemoryStream();
-        //    _evenStreamWriter = new StreamWriter(_memoryStream);
-        //    _evenStreamWriter.Write(EvenFakeFileContent());
-        //    _evenStreamWriter.Flush();
-        //}
-
-        //private string EvenFakeFileContent()
-        //{
-        //    return "2,4,30\n";
-        //}
-
-        //private void CreateOddStreamWriter()
-        //{
-        //    _memoryStream = new MemoryStream();
-        //    _oddStreamWriter = new StreamWriter(_memoryStream);
-        //    _oddStreamWriter.Write(OddFakeFileContent());
-        //    _oddStreamWriter.Flush();
-        //}
-
-        //private string OddFakeFileContent()
-        //{
-        //    return "1,5,99\n";
-        //}
+        private string FakeFileContent()
+        {
+            return "2,4,7,30,99\n";
+        }
     }
 }
