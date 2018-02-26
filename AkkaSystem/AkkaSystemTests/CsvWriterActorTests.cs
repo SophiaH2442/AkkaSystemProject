@@ -54,6 +54,32 @@ namespace AkkaSystemTests
             AwaitAssert(() => _streamWriterFactory.Verify(f => f.Create("Sam Vimes")), TimeSpan.FromSeconds(5));
         }
 
+        [Test]
+        public void WhenReceivesCloseEvenFileMessage_ClosesStreamWriter()
+        {
+            var evenFilePath = "Pickles and jams.txt";
+
+            _streamWriterFactory.Setup(f => f.Create(evenFilePath)).Returns(_streamWriter);
+            var actorInTest = CreateCsvWriterActor();
+
+            actorInTest.Tell(new EvenOpenFile(evenFilePath));
+            actorInTest.Tell(new EvenCloseFile());
+
+            AwaitAssert(() => _streamWriterFactory.VerifyAll(), TimeSpan.FromSeconds(5));
+        }
+
+        [Test]
+        public void WhenReceivesCloseOddFileMessage_ClosesStreamWriter()
+        {
+            var oddFilePath = "Sam Vimes";
+            _streamWriterFactory.Setup(f => f.Create(oddFilePath)).Returns(_streamWriter);
+            var actorInTest = CreateCsvWriterActor();
+
+            actorInTest.Tell(new OddOpenFile(oddFilePath));
+            actorInTest.Tell(new OddCloseFile());
+
+            AwaitAssert(() => _streamWriterFactory.VerifyAll(), TimeSpan.FromSeconds(5));
+        }
 
         private IActorRef CreateCsvWriterActor()
         {

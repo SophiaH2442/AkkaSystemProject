@@ -30,8 +30,8 @@ namespace AkkaSystem
 
     public class CsvReaderActor : ReceiveActor
     {
-        private IActorRef _csvWriterActor;
-        private IStreamReaderFactory _streamReaderFactory;
+        private readonly IActorRef _csvWriterActor;
+        private readonly IStreamReaderFactory _streamReaderFactory;
 
         public CsvReaderActor(IActorRef csvWriterActor, IStreamReaderFactory streamReaderFactory)
         {
@@ -55,12 +55,15 @@ namespace AkkaSystem
                 while (!reader.EndOfStream)
                 {
                     var strline = reader.ReadLine();
-                    var values = strline.Split(',');
-
-                    foreach (var item in values)
+                    if (strline != null)
                     {
-                        var writeNumberMessage = new WriteNumber(Int32.Parse(item));
-                        _csvWriterActor.Tell(writeNumberMessage);
+                        var values = strline.Split(',');
+
+                        foreach (var item in values)
+                        {
+                            var writeNumberMessage = new WriteNumber(Int32.Parse(item));
+                            _csvWriterActor.Tell(writeNumberMessage);
+                        }
                     }
                 }
             }

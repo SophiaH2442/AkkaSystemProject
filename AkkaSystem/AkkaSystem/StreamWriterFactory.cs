@@ -4,9 +4,9 @@ namespace AkkaSystem
 {
     public class StreamWriterFactory : IStreamWriterFactory
     {
-        public StreamWriter Create(string evenFilePath)
+        public StreamWriter Create(string filePath)
         {
-            return new StreamWriter(evenFilePath);
+            return new StreamWriter(filePath);
         }
     }
 }

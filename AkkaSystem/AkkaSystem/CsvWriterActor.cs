@@ -33,7 +33,7 @@ namespace AkkaSystem
 
     public class CsvWriterActor : ReceiveActor
     {
-        private IStreamWriterFactory _streamWriterFactory;
+        private readonly IStreamWriterFactory _streamWriterFactory;
         private StreamWriter _oddWriter;
         private StreamWriter _evenWriter;
 
@@ -47,8 +47,6 @@ namespace AkkaSystem
             Receive<EvenCloseFile>(message => StopWritingEven(message));
             Receive<OddCloseFile>(message => StopWritingOdd(message));
         }
-
-
 
         protected void StartWritingEven(EvenOpenFile message)
         {
